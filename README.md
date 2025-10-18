@@ -20,13 +20,15 @@ A small backend service to upload product CSVs, validate rows, store valid produ
 
 ## Quickstart (local)
 
+```markdown
+
 1. Create a virtualenv and install:
 
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt`
+pip install -r requirements.txt
 
 
 2. Run the app:
