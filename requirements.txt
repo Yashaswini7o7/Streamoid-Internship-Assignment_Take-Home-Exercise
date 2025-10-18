@@ -1,1 +1,7 @@
-
+fastapi
+uvicorn[standard]
+SQLAlchemy
+pydantic
+python-multipart
+pytest
+requests
