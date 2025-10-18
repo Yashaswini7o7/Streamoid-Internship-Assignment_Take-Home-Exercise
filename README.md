@@ -23,7 +23,7 @@ A small backend service to upload product CSVs, validate rows, store valid produ
 1. Create a virtualenv and install:
 
 
-```bash`
+```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt`
