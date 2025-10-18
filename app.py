@@ -80,10 +80,10 @@ async def upload(file: UploadFile = File(...)):
         if errors:
             failed.append({"line": line_no, "sku": row.get("sku"), "errors": errors})
             continue
-        # check duplicate sku
+        # duplicate sku
         existing = session.query(Product).filter_by(sku=row.get("sku")).first()
         if existing:
-            # update existing record
+            # update
             existing.name = row.get("name")
             existing.brand = row.get("brand")
             existing.color = row.get("color")
