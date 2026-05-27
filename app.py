@@ -32,11 +32,10 @@ REQUIRED_FIELDS = ["sku", "name", "brand", "mrp", "price"]
 
 def validate_row(row: dict):
     errors = []
-    # required
     for f in REQUIRED_FIELDS:
         if not row.get(f) or row.get(f).strip() == "":
             errors.append(f"missing {f}")
-    # numeric conversions
+
     try:
         mrp = float(row.get("mrp") or 0)
     except Exception:
@@ -52,7 +51,7 @@ def validate_row(row: dict):
     except Exception:
         errors.append("invalid quantity")
         qty = None
-    # business rules
+
     if mrp is not None and price is not None:
         if price > mrp:
             errors.append("price must be <= mrp")
@@ -74,16 +73,13 @@ async def upload(file: UploadFile = File(...)):
     line_no = 1
     for row in reader:
         line_no += 1
-        # strip values
         row = {k.strip(): (v.strip() if v is not None else "") for k, v in row.items()}
         errors = validate_row(row)
         if errors:
             failed.append({"line": line_no, "sku": row.get("sku"), "errors": errors})
             continue
-        # duplicate sku
         existing = session.query(Product).filter_by(sku=row.get("sku")).first()
         if existing:
-            # update
             existing.name = row.get("name")
             existing.brand = row.get("brand")
             existing.color = row.get("color")
@@ -102,8 +98,7 @@ async def upload(file: UploadFile = File(...)):
             size=row.get("size"),
             mrp=float(row.get("mrp")),
             price=float(row.get("price")),
-            quantity=int(row.get("quantity") or 0)
-        )
+            quantity=int(row.get("quantity") or 0))
         session.add(prod)
         try:
             session.commit()
@@ -120,31 +115,25 @@ def list_products(page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=10
     offset = (page - 1) * limit
     q = session.query(Product).offset(offset).limit(limit).all()
     total = session.query(Product).count()
-    results = [
-        {
-            "sku": p.sku,
-            "name": p.name,
-            "brand": p.brand,
-            "color": p.color,
-            "size": p.size,
-            "mrp": p.mrp,
-            "price": p.price,
-            "quantity": p.quantity
-        }
-        for p in q
-    ]
+    results = [{"sku": p.sku,
+                "name": p.name,
+                "brand": p.brand,
+                "color": p.color,
+                "size": p.size,
+                "mrp": p.mrp,
+                "price": p.price,
+                "quantity": p.quantity}
+               for p in q]
     session.close()
     return {"page": page, "limit": limit, "total": total, "items": results}
 
 @app.get("/products/search")
-def search_products(
-    brand: Optional[str] = None,
-    color: Optional[str] = None,
-    minPrice: Optional[float] = None,
-    maxPrice: Optional[float] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100)
-):
+def search_products(brand: Optional[str] = None,
+                    color: Optional[str] = None,
+                    minPrice: Optional[float] = None,
+                    maxPrice: Optional[float] = None,
+                    page: int = Query(1, ge=1),
+                    limit: int = Query(10, ge=1, le=100)):
     session = SessionLocal()
     q = session.query(Product)
     if brand:
@@ -158,23 +147,18 @@ def search_products(
     total = q.count()
     offset = (page - 1) * limit
     items = q.offset(offset).limit(limit).all()
-    results = [
-        {
-            "sku": p.sku,
-            "name": p.name,
-            "brand": p.brand,
-            "color": p.color,
-            "size": p.size,
-            "mrp": p.mrp,
-            "price": p.price,
-            "quantity": p.quantity
-        }
-        for p in items
-    ]
+    results = [{"sku": p.sku,
+                "name": p.name,
+                "brand": p.brand,
+                "color": p.color,
+                "size": p.size,
+                "mrp": p.mrp,
+                "price": p.price,
+                "quantity": p.quantity}
+               for p in items]
     session.close()
     return {"page": page, "limit": limit, "total": total, "items": results}
 
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 return JSONResponse({"stored": stored, "failed": failed})
-
